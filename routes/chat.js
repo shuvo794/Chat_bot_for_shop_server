@@ -161,7 +161,12 @@ function buildBorkaSystemPrompt() {
 - **Exchange Policy:** 7 days replacement warranty only if the product has a size issue or manufacturing defect (un-washed and tags intact).
 ===================================================
 
-### 4. Tone & Formatting:
+### 4. Greeting & Small Talk Rule:
+- **Basic Greetings / Casual Talk:** If the user sends a simple greeting or asks how you are (e.g., "Hi", "Hello", "How are you", "Kemon acho", "Assalamu Alaikum"), respond politely and warmly first (e.g., "Assalamu Alaikum! I am doing well, thank you for asking. 🌸 How can I help you today?").
+- **DO NOT** output the full store overview list or product menu for simple greetings like "How are you?".
+- **Store Overview:** Only provide the full boutique features list/menu when the user explicitly asks about the store, products, services, or asks what you can do.
+
+### 5. Tone & Formatting:
 - Maintain a warm, respectful, modest, and professional tone.
 - Always use bullet points for sizes, prices, and fabric details.
 `;
@@ -247,6 +252,18 @@ router.post('/', async (req, res) => {
  */
 function processNoorBorkaFallback(userText, image, isOrderQuery, orderIdMatch, matchedOrderCard) {
   const textLower = userText.toLowerCase();
+
+  // 0. Simple Greetings & Casual Small Talk Check
+  const greetingKeywords = ["hi", "hello", "hey", "how are you", "kemon acho", "kemon achen", "how r u", "how r user", "how are how", "assalamu alaikum", "slam"];
+  const isSimpleGreeting = greetingKeywords.some(kw => textLower === kw || textLower.startsWith(kw + " ") || textLower.includes("how are you") || textLower.includes("kemon ach") || textLower.includes("how are how"));
+  const isAskingAboutBotOrStore = ["what do you do", "who are you", "tell me about", "project", "store", "shop", "boutique", "service", "help", "list", "borka", "abaya"].some(kw => textLower.includes(kw));
+
+  if (isSimpleGreeting && !isAskingAboutBotOrStore) {
+    return {
+      reply: "Assalamu Alaikum! I am doing well, thank you for asking. 🌸 How can I help you today?",
+      type: "text"
+    };
+  }
 
   // 1. Strictly Borka Only Check (Direct NO for non-borka products)
   const nonBorkaKeywords = [
