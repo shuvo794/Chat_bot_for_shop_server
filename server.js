@@ -22,6 +22,15 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 // Mount API Routes
 app.use('/api/chat', chatRouter);
 
+// Root Endpoint
+app.get('/', (req, res) => {
+  res.json({
+    message: 'Nova AI Backend Server is running successfully!',
+    healthCheck: '/api/health',
+    chatEndpoint: '/api/chat'
+  });
+});
+
 // Health Check Endpoint
 app.get('/api/health', (req, res) => {
   res.json({
